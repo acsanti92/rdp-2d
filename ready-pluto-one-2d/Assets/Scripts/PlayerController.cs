@@ -22,6 +22,12 @@ public class PlayerController : MonoBehaviour
     public BulletController shotToFire;
     // Reference to the Transform component called "shotPoint"
     public Transform shotPoint;
+    // Double Jump
+    private bool canDoubleJump;
+    // Dash
+    public float dashSpeed, dashTime;
+    // Dash Counter
+    private float dashCounter;
 
     // Start is called before the first frame update
     void Start()
@@ -32,25 +38,51 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Move the player left and right
-        theRB.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * moveSpeed, theRB.velocity.y);
-
-        // Handle Direction Change 
-        if (theRB.velocity.x < 0)
+        if (Input.GetButtonDown("Fire2"))
         {
-            transform.localScale = new Vector3(-1f, 1f, 1f);
+            dashCounter = dashTime;
         }
-        else if (theRB.velocity.x > 0)
+
+        if (dashCounter > 0)
         {
-            transform.localScale = Vector3.one;
+            dashCounter -= Time.deltaTime;
+
+            theRB.velocity = new Vector2(dashSpeed * transform.localScale.x, theRB.velocity.y);
+        }
+        else
+        {
+            // Move the player left and right
+            theRB.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * moveSpeed, theRB.velocity.y);
+
+            // Handle Direction Change 
+            if (theRB.velocity.x < 0)
+            {
+                transform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+            else if (theRB.velocity.x > 0)
+            {
+                transform.localScale = Vector3.one;
+            }
         }
 
         // Checking if the player is on the ground
         isOnGround = Physics2D.OverlapCircle(groundPoint.position, 0.2f, whatIsGround);
 
         // Jump
-        if (Input.GetButtonDown("Jump") && isOnGround)
+        if (Input.GetButtonDown("Jump") && (isOnGround || canDoubleJump))
         {
+            if (isOnGround)
+            {
+                // Since player is in the air, they can double jump
+                canDoubleJump = true;
+            }
+            else
+            {
+                canDoubleJump = false;
+                // Set the animation
+                theAnim.SetTrigger("doubleJump");
+            }
+            // Add force to the player
             theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
         }
 
