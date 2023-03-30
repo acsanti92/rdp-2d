@@ -42,6 +42,15 @@ public class PlayerController : MonoBehaviour
     // So the player can't continuously dash
     private float dashRechargeCounter;
 
+    // Player States
+    public GameObject standing, ball;
+    // How long we wait to turn into a ball
+    public float waitToBall;
+    // Keeping track of how long we wait to turn into a ball
+    private float ballCounter;
+    // Reference to the Animator component called "ballAnim"
+    public Animator ballAnim;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -58,7 +67,7 @@ public class PlayerController : MonoBehaviour
         else
         {
 
-            if (Input.GetButtonDown("Fire2"))
+            if (Input.GetButtonDown("Fire2") && standing.activeSelf)
             {
                 dashCounter = dashTime;
                 ShowAfterImage();
@@ -124,9 +133,51 @@ public class PlayerController : MonoBehaviour
             theAnim.SetTrigger("shotFired");
         }
 
+        // Ball Mode
+        if (!ball.activeSelf)
+        {
+            if (Input.GetAxisRaw("Vertical") < -0.9f)
+            {
+                ballCounter -= Time.deltaTime;
+                if (ballCounter <= 0)
+                {
+                    ball.SetActive(true);
+                    standing.SetActive(false);
+                }
+            }
+            else
+            {
+                ballCounter = waitToBall;
+            }
+        }
+        else
+        {
+            if (Input.GetAxisRaw("Vertical") > -0.9f)
+            {
+                ballCounter -= Time.deltaTime;
+                if (ballCounter <= 0)
+                {
+                    ball.SetActive(false);
+                    standing.SetActive(true);
+                }
+            }
+            else
+            {
+                ballCounter = waitToBall;
+            }
+        }
+
         // Set the animation
-        theAnim.SetBool("isOnGround", isOnGround);
-        theAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
+        if (standing.activeSelf)
+        {
+            // Set the animation
+            theAnim.SetBool("isOnGround", isOnGround);
+            theAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
+        }
+        if (ball.activeSelf)
+        {
+            ballAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
+        }
     }
 
     // Render the after image
