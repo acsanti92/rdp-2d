@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     public Transform shotPoint;
     // Double Jump
     private bool canDoubleJump;
+
     // Dash
     public float dashSpeed, dashTime;
     // Dash Counter
@@ -36,6 +37,10 @@ public class PlayerController : MonoBehaviour
     private float afterImageCounter;
     // After Image Color
     public Color afterImageColor;
+    // How long we wait after dashing
+    public float waitAfterDashing;
+    // So the player can't continuously dash
+    private float dashRechargeCounter;
 
     // Start is called before the first frame update
     void Start()
@@ -46,10 +51,18 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Fire2"))
+        if (dashRechargeCounter > 0)
         {
-            dashCounter = dashTime;
-            ShowAfterImage();
+            dashRechargeCounter -= Time.deltaTime;
+        }
+        else
+        {
+
+            if (Input.GetButtonDown("Fire2"))
+            {
+                dashCounter = dashTime;
+                ShowAfterImage();
+            }
         }
 
         if (dashCounter > 0)
@@ -63,6 +76,8 @@ public class PlayerController : MonoBehaviour
             {
                 ShowAfterImage();
             }
+
+            dashRechargeCounter = waitAfterDashing;
         }
         else
         {
@@ -114,7 +129,7 @@ public class PlayerController : MonoBehaviour
         theAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
     }
 
-    //
+    // Render the after image
     public void ShowAfterImage()
     {
         SpriteRenderer image = Instantiate(afterImage, transform.position, transform.rotation);
