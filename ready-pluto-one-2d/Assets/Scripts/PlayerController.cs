@@ -18,6 +18,10 @@ public class PlayerController : MonoBehaviour
     public LayerMask whatIsGround;
     // Reference to the Animator component called "theAnim"
     public Animator theAnim;
+    // Reference to the BulletController component called "shotToFire"
+    public BulletController shotToFire;
+    // Reference to the Transform component called "shotPoint"
+    public Transform shotPoint;
 
     // Start is called before the first frame update
     void Start()
@@ -48,6 +52,14 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Jump") && isOnGround)
         {
             theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
+        }
+
+        // Shoot
+        if (Input.GetButtonDown("Fire1"))
+        {
+            Instantiate(shotToFire, shotPoint.position, shotPoint.rotation).moveDir = new Vector2(transform.localScale.x, 0f);
+
+            theAnim.SetTrigger("shotFired");
         }
 
         // Set the animation
