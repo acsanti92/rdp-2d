@@ -1,0 +1,27 @@
+{
+  "id": "com.yourcompany.yourgame",
+  "version": "1.0.0",
+  "vendor": "Your Name or Studio",
+  "type": "web",
+  "main": "index.html",
+  "title": "Your Game Title",
+  "icon": "TemplateData/favicon.ico",
+  "largeIcon": "Assets/largeIcon.png",
+  "description": "A brief description of your game.",
+  "author": {
+    "name": "Your Name or Studio",
+    "email": "your-email@example.com",
+    "url": "https://yourgame.example.com"
+  },
+  "license": "MIT",
+  "unity_version": "2021.1.20",
+  "webgl": {
+    "memory_size": 256
+  },
+  "category": "games",
+  "supportedLanguages": [
+    "en"
+  ],
+  "requiredPermissions": []
+}
+

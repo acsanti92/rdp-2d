@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     public LayerMask whatIsGround;
     // Reference to the Animator component called "theAnim"
     public Animator theAnim;
+    // Slow down Animation speed for SmartTV
+    public float animSpeed = 0.5f;
     // Reference to the BulletController component called "shotToFire"
     public BulletController shotToFire;
     // Reference to the Transform component called "shotPoint"
@@ -41,20 +43,25 @@ public class PlayerController : MonoBehaviour
     public float waitAfterDashing;
     // So the player can't continuously dash
     private float dashRechargeCounter;
+    // The following variables are for double tap handling
+    private float lastTapTime;
+    public float doubleTapInterval = 0.3f;
+    private KeyCode previousArrow;
 
-    // Player States
-    public GameObject standing, ball;
-    // How long we wait to turn into a ball
-    public float waitToBall;
-    // Keeping track of how long we wait to turn into a ball
-    private float ballCounter;
-    // Reference to the Animator component called "ballAnim"
-    public Animator ballAnim;
+    // // Player States
+    // public GameObject standing, ball;
+    // // How long we wait to turn into a ball
+    // public float waitToBall;
+    // // Keeping track of how long we wait to turn into a ball
+    // private float ballCounter;
+    // // Reference to the Animator component called "ballAnim"
+    // public Animator ballAnim;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        // Set the animation speed
+        theAnim.speed = animSpeed;
     }
 
     // Update is called once per frame
@@ -67,10 +74,21 @@ public class PlayerController : MonoBehaviour
         else
         {
 
-            if (Input.GetButtonDown("Fire2") && standing.activeSelf)
+            // Check for double tap
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
             {
-                dashCounter = dashTime;
-                ShowAfterImage();
+                KeyCode currentArrow = Input.GetKeyDown(KeyCode.LeftArrow) ? KeyCode.LeftArrow : KeyCode.RightArrow;
+                if (previousArrow == currentArrow)
+                {
+                    float timeSinceLastTap = Time.time - lastTapTime;
+                    if (timeSinceLastTap <= doubleTapInterval)
+                    {
+                        dashCounter = dashTime;
+                        ShowAfterImage();
+                    }
+                }
+                lastTapTime = Time.time;
+                previousArrow = currentArrow;
             }
         }
 
@@ -108,7 +126,7 @@ public class PlayerController : MonoBehaviour
         isOnGround = Physics2D.OverlapCircle(groundPoint.position, 0.2f, whatIsGround);
 
         // Jump
-        if (Input.GetButtonDown("Jump") && (isOnGround || canDoubleJump))
+        if (Input.GetKeyDown(KeyCode.UpArrow) && (isOnGround || canDoubleJump))
         {
             if (isOnGround)
             {
@@ -126,58 +144,58 @@ public class PlayerController : MonoBehaviour
         }
 
         // Shoot
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             Instantiate(shotToFire, shotPoint.position, shotPoint.rotation).moveDir = new Vector2(transform.localScale.x, 0f);
 
             theAnim.SetTrigger("shotFired");
         }
 
-        // Ball Mode
-        if (!ball.activeSelf)
-        {
-            if (Input.GetAxisRaw("Vertical") < -0.9f)
-            {
-                ballCounter -= Time.deltaTime;
-                if (ballCounter <= 0)
-                {
-                    ball.SetActive(true);
-                    standing.SetActive(false);
-                }
-            }
-            else
-            {
-                ballCounter = waitToBall;
-            }
-        }
-        else
-        {
-            if (Input.GetAxisRaw("Vertical") > -0.9f)
-            {
-                ballCounter -= Time.deltaTime;
-                if (ballCounter <= 0)
-                {
-                    ball.SetActive(false);
-                    standing.SetActive(true);
-                }
-            }
-            else
-            {
-                ballCounter = waitToBall;
-            }
-        }
+        // // Ball Mode
+        // if (!ball.activeSelf)
+        // {
+        //     if (Input.GetAxisRaw("Vertical") < -0.9f)
+        //     {
+        //         ballCounter -= Time.deltaTime;
+        //         if (ballCounter <= 0)
+        //         {
+        //             ball.SetActive(true);
+        //             standing.SetActive(false);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         ballCounter = waitToBall;
+        //     }
+        // }
+        // else
+        // {
+        //     if (Input.GetAxisRaw("Vertical") > -0.9f)
+        //     {
+        //         ballCounter -= Time.deltaTime;
+        //         if (ballCounter <= 0)
+        //         {
+        //             ball.SetActive(false);
+        //             standing.SetActive(true);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         ballCounter = waitToBall;
+        //     }
+        // }
 
+        // // Set the animation
+        // if (standing.activeSelf)
+        // {
         // Set the animation
-        if (standing.activeSelf)
-        {
-            // Set the animation
-            theAnim.SetBool("isOnGround", isOnGround);
-            theAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
-        }
-        if (ball.activeSelf)
-        {
-            ballAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
-        }
+        theAnim.SetBool("isOnGround", isOnGround);
+        theAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
+        // }
+        // if (ball.activeSelf)
+        // {
+        //     ballAnim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
+        // }
     }
 
     // Render the after image
